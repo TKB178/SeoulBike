@@ -178,7 +178,22 @@ with tab1:
         # Apply Feature Pipeline
         feat_df = engineer_all_features(input_df)
         feat_mapped = map_binary_features(feat_df)
-        X_infer = feat_mapped.drop(columns=["Date"])
+
+        # Drop date and target if present
+        cols_to_drop = [c for c in ["Date", "Rented Bike Count"] if c in feat_mapped.columns]
+        X_infer = feat_mapped.drop(columns=cols_to_drop)
+
+        # Force X_infer to match the exact column names expected by the trained preprocessor
+        if hasattr(preprocessor, "feature_names_in_"):
+            expected_cols = list(preprocessor.feature_names_in_)
+            # Ensure missing columns are added or reordered
+            for col in expected_cols:
+                if col not in X_infer.columns:
+                    X_infer[col] = 0
+            X_infer = X_infer[expected_cols]
+
+        # Transform & Predict
+        X_proc = preprocessor.transform(X_infer)
 
         # Extreme Weather Safeguard Clipping
         if rainfall > 20.0 or snowfall > 10.0:
