@@ -1,0 +1,16 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment and cache files
+.venv/
+venv/
+ENV/
+.gradio/
+catboost_info/
+.DS_Store
+
+# DO NOT IGNORE MODELS OR DATASETS
+!models/*.joblib
+!SeoulBikeData.csv

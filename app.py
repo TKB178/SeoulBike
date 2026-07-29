@@ -3,6 +3,7 @@ Streamlit Web Application: Seoul Bike Sharing Demand Prediction System
 System Prototype complying with SPEC.md and IMPLEMENT.md
 """
 import os
+import sys  
 import joblib
 import numpy as np
 import pandas as pd
@@ -11,10 +12,23 @@ import plotly.graph_objects as go
 import shap
 import streamlit as st
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# --- Absolute Base Directory Resolution ---
+# Ensures all relative paths resolve correctly regardless of Streamlit Cloud mount paths
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(BASE_DIR)
 
-from src.feature_engineering import engineer_all_features
-from src.preprocessing import map_binary_features, inverse_transform_target
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
+# Import feature functions safely whether running locally or on Streamlit Cloud
+try:
+    from src.feature_engineering import engineer_all_features
+    from src.preprocessing import map_binary_features, inverse_transform_target
+except ModuleNotFoundError:
+    from feature_engineering import engineer_all_features
+    from preprocessing import map_binary_features, inverse_transform_target
 
 
 # --- Page Configuration ---
@@ -29,7 +43,7 @@ st.set_page_config(
 # --- Cached Artifact Loaders ---
 @st.cache_resource
 def load_models_and_preprocessor():
-    models_dir = "models"
+    models_dir = os.path.join(BASE_DIR, "models")
     models = {
         "CatBoost Regressor": joblib.load(os.path.join(models_dir, "catboost.joblib")),
         "XGBoost Regressor": joblib.load(os.path.join(models_dir, "xgboost.joblib")),
@@ -41,7 +55,11 @@ def load_models_and_preprocessor():
 
 @st.cache_data
 def load_sample_data():
-    file_path = "SeoulBikeData.csv" if os.path.exists("SeoulBikeData.csv") else "data/raw/SeoulBikeData.csv"
+    # Attempt local root file, subfolder data/raw, or fallback gracefully
+    primary_path = os.path.join(BASE_DIR, "SeoulBikeData.csv")
+    fallback_path = os.path.join(BASE_DIR, "data", "raw", "SeoulBikeData.csv")
+    
+    file_path = primary_path if os.path.exists(primary_path) else fallback_path
     raw_df = pd.read_csv(file_path, encoding="unicode_escape")
     
     # Standardize column names
@@ -317,7 +335,7 @@ with tab4:
     sim_stations["Stockout Deficit Risk"] = sim_stations["Predicted Demand (Next Hour)"] - sim_stations["Current Available Inventory"]
     sim_stations["Dispatch Recommendation"] = sim_stations.apply(
         lambda r: f"🚨 DISPATCH {r['Stockout Deficit Risk']} BIKES" if r["Predicted Demand (Next Hour)"] > demand_threshold and r["Stockout Deficit Risk"] > 0 else "✅ OPTIMAL INVENTORY",
-        axis = 1,
+        axis=1,
     )
 
-    st.dataframe(sim_stations, use_container_width = True)
+    st.dataframe(sim_stations, use_container_width=True)

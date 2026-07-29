@@ -108,8 +108,8 @@ def train_and_evaluate_all(data_path: str, models_dir: str = "models/"):
         X_full_proc = preprocessor.fit_transform(X)
         model.fit(X_full_proc, y_log)
         
-        joblib.dump(model, os.path.join(models_dir, f"{name.lower()}.joblib"))
-        
+        joblib.dump(model, os.path.join(models_dir, f"{name.lower()}.joblib"), compress = 3)        
+
     joblib.dump(preprocessor, os.path.join(models_dir, "preprocessor.joblib"))
     print("\n✅ All models trained and artifacts successfully saved to models/!")
     return results
