@@ -133,7 +133,7 @@ snowfall = st.sidebar.number_input("Snowfall (cm)", 0.0, 30.0, 0.0, 0.5, disable
 # --- Application Header ---
 st.title("Seoul Bike Sharing Demand Forecasting & Operations Engine")
 st.markdown(
-    "**Course:** BMDS2003 Data Science | **System Status:** Production Prototype | **Framework:** CRISP-DM"
+    "**System Status:** Production Prototype | **Framework:** CRISP-DM"
 )
 st.markdown("---")
 
