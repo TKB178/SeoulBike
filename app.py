@@ -2,7 +2,6 @@
 Streamlit Web Application: Seoul Bike Sharing Demand Prediction System
 System Prototype complying with SPEC.md and IMPLEMENT.md
 """
-
 import os
 import joblib
 import numpy as np
@@ -11,6 +10,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import shap
 import streamlit as st
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from src.feature_engineering import engineer_all_features
 from src.preprocessing import map_binary_features, inverse_transform_target
